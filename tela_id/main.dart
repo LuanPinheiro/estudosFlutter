@@ -28,6 +28,11 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: corFundo,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
+        onPressed: () {
+          setState(() {
+            idade++;
+          });
+        },
       ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(30.0, 40.0, 30.0, 0.0),
