@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:estudos/services.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -7,15 +8,14 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  Map parametros = {};
+  WorldTime? parametros;
 
   @override
   Widget build(BuildContext context) {
-    parametros = parametros.isNotEmpty ? parametros : ModalRoute.of(context)!.settings.arguments as Map;
-    print(parametros);
+    parametros = parametros != null ? parametros : ModalRoute.of(context)!.settings.arguments as WorldTime;
 
-    String bgImage = parametros["isDayTime"] ? "day.png" : "night.png";
-    Color bgColor = parametros["isDayTime"] ? Colors.blue : Colors.indigo;
+    String bgImage = parametros!.isDayTime ? "day.png" : "night.png";
+    Color bgColor = parametros!.isDayTime ? Colors.blue : Colors.indigo;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -36,12 +36,10 @@ class _HomeState extends State<Home> {
                     onPressed: () async {
                       dynamic result = await Navigator.pushNamed(context, "/location");
                       setState(() {
-                        parametros = {
-                          'location': result["location"],
-                          'flag': result["flag"],
-                          'time': result["time"],
-                          'isDayTime': result["isDayTime"],
-                        };
+                        parametros!.location = result["location"];
+                        parametros!.flag = result["flag"];
+                        parametros!.time = result["time"];
+                        parametros!.isDayTime = result["isDayTime"];
                       });
                     },
                     icon: Icon(
@@ -64,7 +62,7 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        parametros!['location'],
+                        parametros!.location,
                         style: TextStyle(
                           fontSize: 20,
                           letterSpacing: 2,
@@ -79,7 +77,7 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        parametros!['time'],
+                        parametros!.time as String,
                         style: TextStyle(
                           fontSize: 60,
                           letterSpacing: 2,

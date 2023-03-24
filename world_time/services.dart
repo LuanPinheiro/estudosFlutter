@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'getFunctions.dart';
 
 class WorldTime {
 
@@ -8,7 +10,7 @@ class WorldTime {
   String? time; // Tempo na localização escolhida
   String flag; // URL para a bandeira do país
   String url; // URL da localização para a API
-  bool? isDayTime; // True ou False caso seja dia ou não
+  bool isDayTime = false; // True ou False caso seja dia ou não
 
   WorldTime ({required this.location, required this.flag, required this.url});
 
@@ -39,7 +41,30 @@ class WorldTime {
       this.isDayTime = time!.contains("AM") ? true : false;
     } catch(e) {
       print("Caught error: $e");
-      time = "Could not get time data";
+      time = "ERROR";
     }
   }
+}
+
+// Busca os dados na api e coloca numa lista organizada de acordo com a classe WorldTime
+Future<List> getDadosApi() async{
+  List dadosRetorno = [];
+
+  Response response = await get(Uri.parse("http://worldtimeapi.org/api/timezones"));
+  List dadosApi = jsonDecode(response.body);
+
+  String location;
+  String flag;
+  String url;
+
+  for(int i = 0; i < dadosApi.length; i++){
+    location = getLocation(dadosApi[i]);
+    if(location != "NOT"){
+      flag = "$location.png";
+      url = dadosApi[i].toString();
+      dadosRetorno.add(WorldTime(location: location, flag: flag, url: url));
+    }
+  }
+
+  return dadosRetorno;
 }

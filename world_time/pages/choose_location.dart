@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:estudo/services.dart';
+import 'package:estudos/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
 
 class ChooseLocation extends StatefulWidget {
   @override
@@ -8,20 +12,11 @@ class ChooseLocation extends StatefulWidget {
 
 class _ChooseLocationState extends State<ChooseLocation> {
 
-  List<WorldTime> locations = [
-    WorldTime(url: 'Europe/London', location: 'London', flag: 'uk.png'),
-    WorldTime(url: 'Europe/Athens', location: 'Athens', flag: 'greece.png'),
-    WorldTime(url: 'Africa/Cairo', location: 'Cairo', flag: 'egypt.png'),
-    WorldTime(url: 'Africa/Nairobi', location: 'Nairobi', flag: 'kenya.png'),
-    WorldTime(url: 'America/Chicago', location: 'Chicago', flag: 'usa.png'),
-    WorldTime(url: 'America/New_York', location: 'New York', flag: 'usa.png'),
-    WorldTime(url: 'Asia/Seoul', location: 'Seoul', flag: 'south_korea.png'),
-    WorldTime(url: 'Asia/Jakarta', location: 'Jakarta', flag: 'indonesia.png'),
-  ];
+  List locations = [];
 
   // Ao clicar no país que quer alterar, envia de volta para a home com os dados alterados
-  void updateTime(index) async{
-    WorldTime selecionado = locations[index];
+  void updateTime(index, dados) async{
+    WorldTime selecionado = dados[index];
     await selecionado.getTime();
 
     // Retorna para home
@@ -33,6 +28,61 @@ class _ChooseLocationState extends State<ChooseLocation> {
     });
   }
 
+  Widget loadTimes() {
+    return FutureBuilder(
+      future: getDadosApi(),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>?> dados) {
+        if(dados.hasData){
+          return escolherLista(dados.data);
+        }
+
+        return const Center(
+          child: SpinKitRing(
+            color: Colors.green,
+            size: 60,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget escolherLista(dados){
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: dados.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                    child: Card(
+                      child: ListTile(
+                        onTap: () {
+                          updateTime(index, dados);
+                        },
+                        title: Text(dados[index].location),
+                        leading: CircleAvatar(
+                          backgroundImage: AssetImage("assets/placeholder.png"),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,26 +93,7 @@ class _ChooseLocationState extends State<ChooseLocation> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: ListView.builder(
-        itemCount: locations.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-            child: Card(
-              child: ListTile(
-                onTap: () {
-                  updateTime(index);
-                },
-                title: Text(locations![index].location),
-                leading: CircleAvatar(
-                  backgroundImage: AssetImage("assets/placeholder.png"),
-                ),
-
-              ),
-            ),
-          );
-        },
-      ),
+      body: loadTimes(),
     );
   }
 }
