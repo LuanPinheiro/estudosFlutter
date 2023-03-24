@@ -7,15 +7,15 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  Map? parametros;
+  Map parametros = {};
 
   @override
   Widget build(BuildContext context) {
-    parametros = ModalRoute.of(context)!.settings.arguments as Map;
+    parametros = parametros.isNotEmpty ? parametros : ModalRoute.of(context)!.settings.arguments as Map;
     print(parametros);
 
-    String bgImage = parametros!["isDayTime"] ? "day.png" : "night.png";
-    Color bgColor = parametros!["isDayTime"] ? Colors.blue : Colors.indigo;
+    String bgImage = parametros["isDayTime"] ? "day.png" : "night.png";
+    Color bgColor = parametros["isDayTime"] ? Colors.blue : Colors.indigo;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -33,8 +33,16 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FilledButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, "/location");
+                    onPressed: () async {
+                      dynamic result = await Navigator.pushNamed(context, "/location");
+                      setState(() {
+                        parametros = {
+                          'location': result["location"],
+                          'flag': result["flag"],
+                          'time': result["time"],
+                          'isDayTime': result["isDayTime"],
+                        };
+                      });
                     },
                     icon: Icon(
                       Icons.edit_location,

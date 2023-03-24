@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:estudos/services.dart';
+import 'package:estudo/services.dart';
 
 class ChooseLocation extends StatefulWidget {
   @override
@@ -19,6 +19,20 @@ class _ChooseLocationState extends State<ChooseLocation> {
     WorldTime(url: 'Asia/Jakarta', location: 'Jakarta', flag: 'indonesia.png'),
   ];
 
+  // Ao clicar no país que quer alterar, envia de volta para a home com os dados alterados
+  void updateTime(index) async{
+    WorldTime selecionado = locations[index];
+    await selecionado.getTime();
+
+    // Retorna para home
+    Navigator.pop(context, {
+      'location': selecionado.location,
+      'flag': selecionado.flag,
+      'time': selecionado.time,
+      'isDayTime': selecionado.isDayTime,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,11 +46,19 @@ class _ChooseLocationState extends State<ChooseLocation> {
       body: ListView.builder(
         itemCount: locations.length,
         itemBuilder: (context, index) {
-          return Card(
-            child: ListTile(
-              onTap: () {
-              },
-              title: Text(locations![index].location),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+            child: Card(
+              child: ListTile(
+                onTap: () {
+                  updateTime(index);
+                },
+                title: Text(locations![index].location),
+                leading: CircleAvatar(
+                  backgroundImage: AssetImage("assets/placeholder.png"),
+                ),
+
+              ),
             ),
           );
         },
